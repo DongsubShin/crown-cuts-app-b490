@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Crown Cuts</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Iconify CDN -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E3A5F',
+                        secondary: '#F59E0B',
+                        background: '#FFFFFF',
+                        card: '#F8FAFC',
+                        body: '#1E293B',
+                        heading: '#0F172A',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'lg': '8px',
+                        'md': '6px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; color: #1E293B; background-color: #FFFFFF; }
+        .sidebar-link.active { background-color: #1E3A5F; color: white; }
+        .sidebar-link:not(.active):hover { background-color: #F1F5F9; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="w-60 bg-white border-r border-slate-200 flex flex-col shrink-0">
+        <div class="p-6">
+            <span class="text-xl font-bold text-primary">Crown Cuts</span>
+        </div>
+        
+        <nav class="flex-1 px-4 space-y-1">
+            <div class="pb-4">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 mb-2">Main</p>
+                <button onclick="showSection('dashboard')" id="nav-dashboard" class="sidebar-link active w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors">
+                    <iconify-icon icon="lucide:layout-dashboard"></iconify-icon>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </button>
+                <button onclick="showSection('queue')" id="nav-queue" class="sidebar-link w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors mt-1">
+                    <iconify-icon icon="lucide:list-ordered"></iconify-icon>
+                    <span class="text-sm font-medium">Live Queue</span>
+                </button>
+            </div>
+
+            <div class="pb-4">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 mb-2">Management</p>
+                <button onclick="showSection('clients')" id="nav-clients" class="sidebar-link w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors">
+                    <iconify-icon icon="lucide:users"></iconify-icon>
+                    <span class="text-sm font-medium">Clients</span>
+                </button>
+                <button onclick="showSection('commission')" id="nav-commission" class="sidebar-link w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors mt-1">
+                    <iconify-icon icon="lucide:banknote"></iconify-icon>
+                    <span class="text-sm font-medium">Commission</span>
+                </button>
+            </div>
+
+            <div class="pb-4">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 mb-2">System</p>
+                <button onclick="showSection('settings')" id="nav-settings" class="sidebar-link w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors">
+                    <iconify-icon icon="lucide:settings"></iconify-icon>
+                    <span class="text-sm font-medium">SMS Settings</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- User Profile -->
+        <div class="p-4 border-t border-slate-200">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xs">
+                    JD
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-bold text-heading truncate">John Doe</p>
+                    <p class="text-xs text-slate-500 truncate">Admin Account</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+        
+        <!-- TOP HEADER -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+            <div class="flex items-center gap-4">
+                <nav class="text-sm text-slate-500 flex items-center gap-2">
+                    <span>Admin</span>
+                    <iconify-icon icon="lucide:chevron-right" class="text-xs"></iconify-icon>
+                    <span id="breadcrumb-active" class="text-heading font-medium">Dashboard</span>
+                </nav>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <div class="relative">
+                    <iconify-icon icon="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon>
+                    <input type="text" placeholder="Search clients..." class="pl-10 pr-4 py-2 bg-slate-100 border-transparent focus:bg-white focus:ring-2 focus:ring-primary/20 rounded-md text-sm w-64 transition-all outline-none">
+                </div>
+                <button class="relative text-slate-500 hover:text-primary transition-colors">
+                    <iconify-icon icon="lucide:bell" width="20"></iconify-icon>
+                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-secondary text-[10px] text-white font-bold rounded-full flex items-center justify-center border-2 border-white">3</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- SCROLLABLE CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto p-8">
+            
+            <!-- SECTION: DASHBOARD -->
+            <section id="section-dashboard" class="space-y-8">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <h1 class="text-2xl font-bold text-heading">Overview</h1>
+                        <p class="text-slate-500">Welcome back, here's what's happening today.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm font-medium hover:bg-slate-50 transition-colors">Export Report</button>
+                        <button class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:opacity-90 transition-opacity shadow-sm">New Booking</button>
+                    </div>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-blue-50 text-primary rounded-md">
+                                <iconify-icon icon="lucide:calendar-check" width="24"></iconify-icon>
+                            </div>
+                            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">+12%</span>
+                        </div>
+                        <p class="text-sm text-slate-500 font-medium">Bookings Today</p>
+                        <p class="text-2xl font-bold text-heading">24</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-amber-50 text-secondary rounded-md">
+                                <iconify-icon icon="lucide:dollar-sign" width="24"></iconify-icon>
+                            </div>
+                            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">+8%</span>
+                        </div>
+                        <p class="text-sm text-slate-500 font-medium">Revenue Today</p>
+                        <p class="text-2xl font-bold text-heading">$1,420.00</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-slate-100 text-slate-600 rounded-md">
+                                <iconify-icon icon="lucide:user-minus" width="24"></iconify-icon>
+                            </div>
+                            <span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded">-2%</span>
+                        </div>
+                        <p class="text-sm text-slate-500 font-medium">No-Show Rate</p>
+                        <p class="text-2xl font-bold text-heading">4.2%</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-purple-50 text-purple-600 rounded-md">
+                                <iconify-icon icon="lucide:users" width="24"></iconify-icon>
+                            </div>
+                            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">+5</span>
+                        </div>
+                        <p class="text-sm text-slate-500 font-medium">New Clients</p>
+                        <p class="text-2xl font-bold text-heading">18</p>
+                    </div>
+                </div>
+
+                <!-- Chart & Recent Activity -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-slate-100">
+                        <h3 class="font-bold text-heading mb-6">Revenue Trend (Weekly)</h3>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
+                        <h3 class="font-bold text-heading mb-6">Barber Performance</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold">AM</div>
+                                    <div>
+                                        <p class="text-sm font-bold">Alex Miller</p>
+                                        <p class="text-xs text-slate-500">8 Bookings</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm font-bold text-primary">$420</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold">SK</div>
+                                    <div>
+                                        <p class="text-sm font-bold">Sam King</p>
+                                        <p class="text-xs text-slate-500">6 Bookings</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm font-bold text-primary">$310</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold">RJ</div>
+                                    <div>
+                                        <p class="text-sm font-bold">Ray Jones</p>
+                                        <p class="text-xs text-slate-500">5 Bookings</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm font-bold text-primary">$285</p>
+                            </div>
+                        </div>
+                        <button class="w-full mt-8 py-2 text-sm font-medium text-primary border border-primary/20 rounded-md hover:bg-primary/5 transition-colors">View All Analytics</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: QUEUE -->
+            <section id="section-queue" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-heading">Live Queue</h1>
+                    <button class="px-4 py-2 bg-secondary text-white rounded-md text-sm font-medium hover:opacity-90 shadow-sm flex items-center gap-2">
+                        <iconify-icon icon="lucide:plus"></iconify-icon>
+                        Add Walk-in
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Waiting -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                            Waiting (3)
+                        </h3>
+                        <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-amber-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-bold text-heading">Marcus Wright</p>
+                                    <p class="text-xs text-slate-500">Skin Fade • 15 min wait</p>
+                                </div>
+                                <button class="text-slate-400 hover:text-primary"><iconify-icon icon="lucide:more-vertical"></iconify-icon></button>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-amber-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-bold text-heading">Leo Thompson</p>
+                                    <p class="text-xs text-slate-500">Beard Trim • 25 min wait</p>
+                                </div>
+                                <button class="text-slate-400 hover:text-primary"><iconify-icon icon="lucide:more-vertical"></iconify-icon></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- In Chair -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            In Chair (2)
+                        </h3>
+                        <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold text-heading">David Chen</p>
+                                    <p class="text-xs text-slate-500">Barber: Alex Miller</p>
+                                </div>
+                                <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded">12:45 LEFT</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold text-heading">Kevin Hart</p>
+                                    <p class="text-xs text-slate-500">Barber: Sam King</p>
+                                </div>
+                                <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded">05:20 LEFT</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Completed -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            Completed (12)
+                        </h3>
+                        <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm opacity-60">
+                            <p class="font-bold text-heading">Brian May</p>
+                            <p class="text-xs text-slate-500">Paid $45.00 • 10:30 AM</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: CLIENTS -->
+            <section id="section-clients" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-heading">Client CRM</h1>
+                    <button class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:opacity-90 shadow-sm">Add New Client</button>
+                </div>
+
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-4 border-b border-slate-200 flex flex-wrap gap-4 items-center justify-between">
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 rounded-md">All Clients</button>
+                            <button class="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-md">VIP</button>
+                            <button class="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-md">Inactive</button>
+                        </div>
+                    </div>
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                                <th class="px-6 py-4 font-bold">Client Name</th>
+                                <th class="px-6 py-4 font-bold">Phone</th>
+                                <th class="px-6 py-4 font-bold">Last Visit</th>
+                                <th class="px-6 py-4 font-bold">Total Spent</th>
+                                <th class="px-6 py-4 font-bold">Status</th>
+                                <th class="px-6 py-4 font-bold text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 font-bold text-heading">Michael Scott</td>
+                                <td class="px-6 py-4 text-slate-500">(555) 012-3456</td>
+                                <td class="px-6 py-4 text-slate-500">Oct 24, 2023</td>
+                                <td class="px-6 py-4 font-medium">$840.00</td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded uppercase">VIP</span></td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-primary font-bold hover:underline">Edit</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 font-bold text-heading">Jim Halpert</td>
+                                <td class="px-6 py-4 text-slate-500">(555) 987-6543</td>
+                                <td class="px-6 py-4 text-slate-500">Oct 20, 2023</td>
+                                <td class="px-6 py-4 font-medium">$320.00</td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded uppercase">Regular</span></td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-primary font-bold hover:underline">Edit</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 font-bold text-heading">Pam Beesly</td>
+                                <td class="px-6 py-4 text-slate-500">(555) 456-7890</td>
+                                <td class="px-6 py-4 text-slate-500">Sep 12, 2023</td>
+                                <td class="px-6 py-4 font-medium">$150.00</td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded uppercase">Regular</span></td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-primary font-bold hover:underline">Edit</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION: COMMISSION -->
+            <section id="section-commission" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-heading">Commission Tracking</h1>
+                    <div class="flex gap-2">
+                        <select class="bg-white border border-slate-200 rounded-md text-sm px-3 py-2 outline-none">
+                            <option>October 2023</option>
+                            <option>September 2023</option>
+                        </select>
+                        <button class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium">Process Payouts</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                                    <th class="px-6 py-4 font-bold">Barber</th>
+                                    <th class="px-6 py-4 font-bold">Total Sales</th>
+                                    <th class="px-6 py-4 font-bold">Service Rev</th>
+                                    <th class="px-6 py-4 font-bold">Product Rev</th>
+                                    <th class="px-6 py-4 font-bold">Comm. %</th>
+                                    <th class="px-6 py-4 font-bold">Payout Due</th>
+                                    <th class="px-6 py-4 font-bold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm">
+                                <tr>
+                                    <td class="px-6 py-4 font-bold text-heading">Alex Miller</td>
+                                    <td class="px-6 py-4">$4,250.00</td>
+                                    <td class="px-6 py-4">$3,800.00</td>
+                                    <td class="px-6 py-4">$450.00</td>
+                                    <td class="px-6 py-4">60%</td>
+                                    <td class="px-6 py-4 font-bold text-primary">$2,550.00</td>
+                                    <td class="px-6 py-4"><span class="text-amber-600 font-bold text-xs">Pending</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 font-bold text-heading">Sam King</td>
+                                    <td class="px-6 py-4">$3,100.00</td>
+                                    <td class="px-6 py-4">$2,900.00</td>
+                                    <td class="px-6 py-4">$200.00</td>
+                                    <td class="px-6 py-4">55%</td>
+                                    <td class="px-6 py-4 font-bold text-primary">$1,705.00</td>
+                                    <td class="px-6 py-4"><span class="text-green-600 font-bold text-xs">Paid</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: SETTINGS -->
+            <section id="section-settings" class="hidden space-y-6">
+                <h1 class="text-2xl font-bold text-heading">SMS Notification Settings</h1>
+                
+                <div class="max-w-3xl space-y-6">
+                    <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-bold text-heading">Booking Confirmation</p>
+                                <p class="text-sm text-slate-500">Send an SMS immediately when a booking is made.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-bold text-heading">24-Hour Reminder</p>
+                                <p class="text-sm text-slate-500">Send a reminder SMS 24 hours before the appointment.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-slate-100">
+                            <label class="block text-sm font-bold text-heading mb-2">SMS Template</label>
+                            <textarea rows="3" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-md text-sm outline-none focus:ring-2 focus:ring-primary/20">Hi [ClientName], this is a reminder for your appointment at Crown Cuts with [BarberName] tomorrow at [Time]. Reply STOP to opt out.</textarea>
+                            <p class="text-[10px] text-slate-400 mt-2">Available tags: [ClientName], [BarberName], [Time], [Date]</p>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button class="px-6 py-2 bg-primary text-white rounded-md text-sm font-bold hover:opacity-90 transition-opacity">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // Tab Switching Logic
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = ['dashboard', 'queue', 'clients', 'commission', 'settings'];
+            sections.forEach(id => {
+                document.getElementById(`section-${id}`).classList.add('hidden');
+                document.getElementById(`nav-${id}`).classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+            document.getElementById(`nav-${sectionId}`).classList.add('active');
+
+            // Update breadcrumb
+            const breadcrumb = document.getElementById('breadcrumb-active');
+            const titles = {
+                'dashboard': 'Dashboard',
+                'queue': 'Live Queue',
+                'clients': 'Clients',
+                'commission': 'Commission Tracking',
+                'settings': 'SMS Settings'
+            };
+            breadcrumb.innerText = titles[sectionId];
+        }
+
+        // Initialize Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: [1200, 1900, 1500, 2100, 2800, 3400, 1400],
+                        borderColor: '#1E3A5F',
+                        backgroundColor: 'rgba(30, 58, 95, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#F1F5F9' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

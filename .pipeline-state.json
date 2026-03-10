@@ -1,0 +1,43 @@
+{
+  "projectDir": "/Users/dongsub/Documents/Potential/projects/hire-agent/agent-house-bot/generated/crown-cuts-app-37cd5f41",
+  "orderId": "a4196593-484c-4678-8805-4c9d40d6119e",
+  "input": {
+    "app_name": "crown-cuts-app",
+    "features": [
+      "booking",
+      "walk-in-queue",
+      "client-crm",
+      "sms-reminders",
+      "commission-tracking",
+      "payments"
+    ],
+    "business_info": {
+      "name": "Crown Cuts",
+      "address": "Atlanta, GA",
+      "barber_count": 5,
+      "booking_system": "Booksy"
+    },
+    "message": "Mapping out your Crown Cuts build now — booking engine, walk-in queue, SMS reminders, and commission tracking for your 3 commission barbers. Give me a minute.",
+    "stop_after": "prd"
+  },
+  "completedPhases": [
+    "init",
+    "prd",
+    "design",
+    "database",
+    "backend",
+    "frontend",
+    "integrate"
+  ],
+  "phaseResults": [
+    "Setting up your project: Scaffolded 11 files",
+    "Generating your requirements document: Generated PRD: crown-cuts-app_PRD_260310.md (12350 chars). Sent to client for review.",
+    "Designing your pages: Generated 2 HTML designs: User App, Admin Dashboard",
+    "Setting up your data storage: Generated 11 database files (entities + migration)",
+    "Building the backend: Generated 9 backend files (controllers, services, DTOs)",
+    "Building the user interface: Generated 10 frontend files (pages, components, hooks)",
+    "Wiring frontend to backend APIs: Integration included in frontend build"
+  ],
+  "createdAt": "2026-03-10T02:20:18.437Z",
+  "updatedAt": "2026-03-10T02:27:18.937Z"
+}

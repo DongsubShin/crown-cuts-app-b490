@@ -1,0 +1,21 @@
+{
+  "projectId": "0629ef5d",
+  "appName": "crown-cuts-app",
+  "businessName": "Crown Cuts",
+  "features": [
+    "booking",
+    "walk-in-queue",
+    "client-crm",
+    "sms-reminders",
+    "commission-tracking",
+    "payments"
+  ],
+  "businessInfo": {
+    "name": "Crown Cuts",
+    "address": "Atlanta, GA",
+    "barber_count": 5,
+    "booking_system": "Booksy"
+  },
+  "generatedDir": "/Users/dongsub/Documents/Potential/projects/hire-agent/agent-house-bot/generated/crown-cuts-app-37cd5f41",
+  "createdAt": "2026-03-10T02:20:46.787Z"
+}

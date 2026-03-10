@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: crown-cuts-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: crown_cuts
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
